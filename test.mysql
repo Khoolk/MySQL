@@ -1,0 +1,5 @@
+select price_today.stock_code,
+from price_today
+Inner Join price_tomorrow on price_today.stock_code = price_tomorrow.stock_code
+where price_tomorrow.price > price_today.price
+order by stock_code asc;
