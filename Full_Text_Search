@@ -1,0 +1,16 @@
+CREATE TABLE products 
+SELECT 
+  ROW_NUMBER() OVER () AS id,
+  CASE floor(rand()*3) + 1 
+  WHEN 1 THEN 'red ball'
+  WHEN 2 THEN 'blue pen'
+  WHEN 3 THEN 'red pin'
+  END AS name
+FROM information_schema.columns LIMIT 1000;
+
+ALTER TABLE products 
+ADD FULLTEXT INDEX ft_name (name);
+
+SELECT name 
+FROM products 
+WHERE MATCH(name) AGAINST('red');

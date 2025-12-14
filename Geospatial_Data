@@ -1,0 +1,18 @@
+CREATE TABLE locations (
+  location_id INT PRIMARY KEY,
+  location_name VARCHAR(50),
+  coordinates POINT SRID 4326
+);
+
+INSERT INTO locations (location_id, location_name, coordinates)
+VALUES 
+  (1, 'New York', ST_PointFromText('POINT(-74.005973 40.714353)', 4326)),
+  (2, 'London', ST_PointFromText('POINT(-0.127758 51.507351)', 4326)),
+  (3, 'Baltimore', ST_PointFromText('POINT(-76.612190 39.290386)', 4326));
+
+SELECT location_name
+FROM locations
+WHERE ST_Distance_Sphere(
+        coordinates,
+        ST_PointFromText('POINT(-77.036547 38.895111)', 4326)
+      ) <= 100000; -- 100 km

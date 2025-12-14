@@ -1,0 +1,17 @@
+CREATE TABLE users (
+  id int,
+  name VARCHAR(100),
+  register_date DATE
+) PARTITION BY RANGE (YEAR(register_date)) (
+PARTITION u_2023 VALUES LESS THAN (2024),
+PARTITION u_2024 VALUES LESS THAN (2025),
+PARTITION u_future VALUES LESS THAN MAXVALUE
+);
+
+INSERT INTO users (id, name, register_date)
+VALUES 
+  (1, 'A', '2025-11-01'),
+  (2, 'B', '2023-05-09'),
+  (3, 'C', '2024-02-08');
+  
+SELECT * FROM users PARTITION (u_future);

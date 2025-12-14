@@ -1,0 +1,34 @@
+CREATE TABLE users (
+id int auto_increment primary key,
+name varchar(100),
+age int
+);
+
+INSERT INTO users(name, age)
+SELECT
+  CONCAT(char(rand()*26 + 65), char(rand()*26 + 97)) as name,
+  floor(rand()*60) + 12 as age
+FROM information_schema.columns LIMIT 100;
+
+CREATE TABLE purchase(
+user_id int,
+spend int
+);
+
+INSERT INTO purchase(user_id, spend)
+SELECT
+  floor(rand()*100) + 1 as user_id,
+  round(rand()*500, 2) as spend
+FROM information_schema.columns limit 100;
+/* Row */
+SELECT 
+  id, name, age, spend,
+  ROW_NUMBER() OVER (PARTITION BY age ORDER BY spend DESC) AS row_age
+FROM users u
+JOIN purchase p ON u.id = p.user_id;
+/* Rank */
+SELECT
+  id, name, age, spend,
+  RANK() OVER (PARTITION BY age ORDER BY spend DESC) AS rank_age
+FROM users u
+JOIN purchase p on u.id = p.user_id;

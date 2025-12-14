@@ -1,0 +1,21 @@
+CREATE TABLE product
+SELECT 
+  CONCAT(CHAR(floor(rand()*26) + 65), CHAR(floor(rand()*26) + 97)) AS name,
+  ROUND(rand()*100, 2) AS sales,
+  floor(rand()*25) + 1 AS category_id
+FROM information_schema.columns LIMIT 100;
+
+CREATE TABLE categories
+SELECT
+  ROW_NUMBER() OVER () as category_id,
+  CHAR(rand()*26 + 65) AS category_name
+FROM information_schema.columns LIMIT 25;
+
+SELECT 
+COALESCE(category_name, 'All Category') AS category,
+COALESCE(name, 'All Product') AS product,
+ROUND(SUM(sales), 2) AS total_sales
+FROM product p
+JOIN categories c ON c.category_id = p.category_id
+GROUP BY category_name, name WITH ROLLUP
+ORDER BY category, product;

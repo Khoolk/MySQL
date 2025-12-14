@@ -1,0 +1,22 @@
+create table staff
+select 
+  CONCAT(CHAR(floor(rand()*26 + 65)), CHAR(floor(rand()*26 + 97))) as name,
+  DATE(FROM_UNIXTIME(UNIX_TIMESTAMP('1990-01-01') + floor(rand()*(UNIX_TIMESTAMP('2010-12-31') 
+  - UNIX_TIMESTAMP('1990-01-01') + 1)))) as date_of_birth
+FROM information_schema.columns LIMIT 1000;
+
+
+DELIMITER $$
+CREATE FUNCTION calculate_age(date_of_birth DATE)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE age INT;
+    SET age = FLOOR(DATEDIFF(CURDATE(), date_of_birth) / 365.25);
+    RETURN age;
+END$$
+DELIMITER ;
+
+
+SELECT name, calculate_age(date_of_birth) as age 
+FROM staff LIMIT 100;

@@ -1,0 +1,27 @@
+CREATE TABLE product
+SELECT 
+  ROW_NUMBER() OVER() as product_id,
+  CONCAT(CHAR(floor(rand()*26 + 65)), CHAR(floor(rand()*26 + 97))) as name
+FROM information_schema.columns LIMIT 100;
+
+CREATE TABLE orders
+SELECT
+  ROW_NUMBER() OVER() as order_id,
+  DATE(FROM_UNIXTIME(UNIX_TIMESTAMP('2025-01-01') + floor(rand()*(UNIX_TIMESTAMP('2025-10-31') 
+  - UNIX_TIMESTAMP('2025-01-01') + 1)))) AS order_date,
+  floor(rand()*3) + 1 AS quantity
+FROM information_schema.columns LIMIT 1000;
+
+CREATE TABLE order_item
+SELECT 
+  floor(rand()*1000) + 1 AS order_id,
+  floor(rand()*100) + 1 AS product_id
+FROM information_schema.columns LIMIT 1000;
+
+SELECT name, order_date, quantity,
+SUM(quantity) OVER(PARTITION BY name ORDER BY order_date 
+ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total
+FROM order_item oi 
+JOIN orders o ON o.order_id = oi.order_id
+JOIN product p ON p.product_id = oi.product_id
+ORDER BY name, order_date LIMIT 100;

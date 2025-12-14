@@ -1,0 +1,50 @@
+CREATE TABLE product(
+product_id int auto_increment primary key,
+name varchar(100),
+category_id int
+);
+
+INSERT INTO product(name, category_id)
+SELECT 
+  CONCAT(CHAR(rand()*26 + 65), CHAR(rand()*26 + 97)) as name,
+  floor(rand()*10) + 1 as category_id
+FROM information_schema.columns limit 100;
+
+CREATE TABLE categories AS (
+SELECT
+  ROW_NUMBER() OVER () AS category_id,
+  CHAR(65 + ROW_NUMBER() OVER ()) AS category
+FROM information_schema.columns LIMIT 10
+);
+
+CREATE TABLE product_tag AS (
+SELECT 
+  floor(rand()*3 + 1) as tag_id,
+  floor(rand()*100 + 1) AS product_id
+FROM information_schema.columns LIMIT 100
+);
+
+CREATE TABLE tag (
+tag_id int,
+tag_name varchar(100)
+);
+
+INSERT INTO tag VALUES
+(1, 'child'),
+(2, 'male'),
+(3, 'female');
+
+SELECT
+    p.name,
+    p.category_id,
+    c.category,
+    ptags.tag
+FROM product p
+LEFT JOIN categories c
+    ON c.category_id = p.category_id
+LEFT JOIN LATERAL (
+    SELECT GROUP_CONCAT(DISTINCT t.tag_name ORDER BY t.tag_name SEPARATOR ',') AS tag
+    FROM product_tag pt
+    JOIN tag t ON t.tag_id = pt.tag_id
+    WHERE pt.product_id = p.product_id
+) AS ptags ON TRUE;

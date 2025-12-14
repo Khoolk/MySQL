@@ -1,0 +1,49 @@
+CREATE TABLE products(
+name varchar(100),
+category_id int,
+category_name varchar(100),
+sales int
+);
+
+INSERT INTO products(name, category_id, category_name, sales)
+SELECT
+  name,
+  category_id,
+  CASE category_id
+    WHEN 1 THEN 'A'
+    WHEN 2 THEN 'B'
+    WHEN 3 THEN 'C'
+  END AS category_name,
+  sales
+FROM (
+  SELECT 
+    CONCAT(CHAR(rand()*26 + 65), CHAR(rand()*26 + 97)) as name,
+    floor(rand()*3) + 1 as category_id,
+    ROUND(rand()*100, 2) as sales
+  FROM information_schema.columns LIMIT 100
+) t;
+
+SELECT * FROM products LIMIT 5;
+
+CREATE TABLE categories(
+id int auto_increment primary key,
+category_name VARCHAR(100)
+);
+
+INSERT INTO categories (category_name) 
+SELECT 
+  CHAR(64 + ROW_NUMBER() OVER()) AS name
+FROM information_schema.columns LIMIT 3;
+
+SELECT 
+  name, 
+  SUM(CASE WHEN category_name = 'A' THEN sales END) AS 'A',
+  SUM(CASE WHEN category_name = 'B' THEN sales END) AS 'B',
+  SUM(CASE WHEN category_name = 'C' THEN sales END) AS 'C'
+FROM (
+  SELECT 
+    p.name, p.category_name, p.sales
+  FROM products p
+  JOIN categories c ON p.category_id = c.id
+) pivot_table
+GROUP BY name;

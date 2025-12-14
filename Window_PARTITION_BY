@@ -1,0 +1,33 @@
+CREATE TABLE item(
+id int auto_increment primary key,
+name varchar(100),
+price int,
+category_id int
+);
+
+INSERT INTO item(name, price, category_id)
+SELECT 
+  CONCAT(CHAR(rand()*26 + 65), CHAR(rand()*26 + 97)) as name,
+  ROUND(rand()*100, 2) as price,
+  floor(rand()*10 + 1) AS category
+FROM information_schema.columns limit 1000;
+
+CREATE TABLE categories(
+id int auto_increment primary key,
+category varchar(100)
+);
+
+INSERT INTO categories(category)
+SELECT 
+  CHAR(64 + ROW_NUMBER() OVER ()) as category 
+FROM information_schema.columns limit 10;
+
+SELECT 
+  category, name, price,
+  RANK() OVER (PARTITION BY category ORDER BY price DESC) AS rank_price
+FROM (
+  SELECT
+    c.category, i.name, i.price
+  FROM item i 
+  JOIN categories c ON i.category_id = c.id
+) t;

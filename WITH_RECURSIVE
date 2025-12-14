@@ -1,0 +1,36 @@
+create table staff (
+id int auto_increment primary key,
+name varchar(100),
+superior int,
+department varchar(100)
+);
+
+insert into staff (name, superior, department)
+select
+  concat(char(rand()*26+65), char(rand()*26+97)) as name,
+  floor(rand()*100) as superior,
+  case floor(rand()*3)+1
+    when 1 then 'A'
+    when 2 then 'B'
+    when 3 then 'C'
+  end as department
+from information_schema.columns limit 100;
+
+
+
+
+WITH RECURSIVE hierachy as (
+select 
+  id, name, superior, department, 1 as level
+from staff
+where superior = 0
+
+union all
+
+select 
+  s.id, s.name, s.superior, s.department, h.level + 1
+from staff s
+join hierachy h on s.superior = h.id
+)
+select name, level
+from hierachy;
